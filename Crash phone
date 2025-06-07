@@ -1,0 +1,83 @@
+
+
+        final TextView textView = (TextView) findViewById(R.id.text);
+        findViewById(R.id.install).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView.setText("已安装 Blues");
+                install();
+            }
+        });
+
+        findViewById(R.id.uninstall).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                textView.setText("已卸载 Blues");
+                Blues.uninstall();
+            }
+        });
+
+        findViewById(R.id.but1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                throw new RuntimeException("click exception...");
+            }
+        });
+
+        findViewById(R.id.but2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        throw new RuntimeException("handler exception...");
+                    }
+                });
+            }
+        });
+
+        findViewById(R.id.but3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        super.run();
+                        throw new RuntimeException("new thread exception...");
+                    }
+                }.start();
+            }
+        });
+
+        findViewById(R.id.but4).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), SecActivity.class));
+            }
+        });
+
+    }
+
+    private void install() {
+        Blues.install(new Blues.ExceptionHandler() {
+            @Override
+            public void handlerException(final Thread thread, final Throwable throwable) {
+
+                Log.d("Blues", "MainThread: " + Looper.getMainLooper().getThread() + "  curThread: " + Thread.currentThread());
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+
+                            Log.e("AndroidRuntime","--->BluesException:"+thread+"<---",throwable);
+                            Toast.makeText(getApplicationContext(), "Exception Happend\n" + thread + "\n" + throwable.toString(), Toast.LENGTH_SHORT).show();
+//                        throw new RuntimeException("..."+(i++));
+                        } catch (Throwable e) {
+
+                        }
+                    }
+                });
+            }
+        });
+    }
